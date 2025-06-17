@@ -1,7 +1,5 @@
 # GeoZebra - Solver de Programação Linear
 
-![Logo do GeoZebra](logo.png)
-
 ## 📋 Descrição
 
 GeoZebra é uma ferramenta web para resolução de problemas de Programação Linear, oferecendo tanto soluções numéricas quanto visualizações gráficas. O sistema implementa o algoritmo Simplex e o método Big-M, além de fornecer representações gráficas interativas das soluções.
