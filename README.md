@@ -1,8 +1,8 @@
-# GeoZebra - Solver de Programação Linear
+# GriffSolver - Solver de Programação Linear
 
 ## 📋 Descrição
 
-GeoZebra é uma ferramenta web para resolução de problemas de Programação Linear, oferecendo tanto soluções numéricas quanto visualizações gráficas. O sistema implementa o algoritmo Simplex e o método Big-M, além de fornecer representações gráficas interativas das soluções.
+GriffSolver é uma ferramenta web para resolução de problemas de Programação Linear, oferecendo tanto soluções numéricas quanto visualizações gráficas. O sistema implementa o algoritmo Simplex e o método Big-M, além de fornecer representações gráficas interativas das soluções.
 
 ## ✨ Funcionalidades
 
@@ -49,7 +49,7 @@ GeoZebra/
 ## 🚀 Como Usar
 
 1. Clone o repositório
-2. Abra o arquivo `index.html` em seu navegador
+2. Abra o arquivo `index.html` em seu navegador. Recomenda-se utilizar Live Server.
 3. Defina o número de variáveis e restrições
 4. Insira os coeficientes da função objetivo e das restrições
 5. Escolha entre maximização ou minimização
