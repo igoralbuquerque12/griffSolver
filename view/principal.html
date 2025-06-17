@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Resolva+ - Configuração</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="icon" href="../img/logo.png" type="image/png">
+    </head>
+<body class="dashboard-page">
+    <header class="main-header">
+        <div class="header-content">
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">Início</a>
+                <a href="#sobre" class="nav-link">Sobre</a>
+                <a href="#contato" class="nav-link">Contato</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="dashboard-content">
+        <div class="config-section">
+            <h1 class="section-title">Configuração do Problema</h1>
+            <p class="section-description">Defina as variáveis e restrições do seu problema de programação linear</p>
+            
+            <div class="config-panel">
+                <div class="config-form">
+                    <div class="form-group">
+                        <label for="qtdVariaveis">Quantidade de Variáveis</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="qtdVariaveis" value="1" min="1" class="form-input">
+                            <span class="input-icon">x</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="qtdRestricoes">Quantidade de Restrições</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="qtdRestricoes" value="1" min="1" class="form-input">
+                            <span class="input-icon">≤</span>
+                        </div>
+                    </div>
+                    <button id="confirmarBtn" class="action-button">Confirmar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tabela-container" class="table-panel"></div>
+    </main>
+
+    <footer class="minimal-footer">
+        <span>© 2024 Resolva+</span>
+    </footer>
+
+    <script src="../js/tabela.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (localStorage.getItem('modificarProblema') === 'true') {
+                const qtdVariaveis = localStorage.getItem('qtdVariaveis');
+                const qtdRestricoes = localStorage.getItem('qtdRestricoes');
+    
+                if (qtdVariaveis && qtdRestricoes) {
+                    document.getElementById('qtdVariaveis').value = qtdVariaveis;
+                    document.getElementById('qtdRestricoes').value = qtdRestricoes;
+                    document.getElementById('confirmarBtn').click();
+    
+                    const tipoObjetivo = localStorage.getItem('tipoObjetivo');
+                    const coefObjetivo = JSON.parse(localStorage.getItem('coefObjetivo'));
+                    const restricoes = JSON.parse(localStorage.getItem('restricoes'));
+    
+                    document.getElementById('tipoObjetivo').value = tipoObjetivo;
+    
+                    coefObjetivo.forEach((valor, i) => {
+                        document.getElementById(`coefObjetivo${i + 1}`).value = valor;
+                    });
+    
+                    restricoes.forEach((restricao, i) => {
+                        restricao.coef.forEach((valor, j) => {
+                            document.getElementById(`coefRestricao${i + 1}_${j + 1}`).value = valor;
+                        });
+                        document.getElementById(`operadorRestricao${i + 1}`).value = restricao.operator;
+                        document.getElementById(`rhsRestricao${i + 1}`).value = restricao.rhs;
+                    });
+                }
+    
+                localStorage.removeItem('modificarProblema');
+            }
+        });
+    </script>
+</body>
+</html>

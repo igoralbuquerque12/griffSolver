@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GriffSolver - Visualização</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="../img/logo.png" type="image/png">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .graph-container {
+            width: 100%;
+            height: 100%;
+            min-height: 600px;
+            margin: 20px 0;
+            overflow: visible;
+        }
+        .main-graph {
+            width: 100%;
+            height: 100%;
+            min-height: 600px;
+        }
+        .visualization-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .action-options {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin: 2rem 0;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+        }
+        .action-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            text-align: center;
+        }
+        .action-option p {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+        .action-option .action-button {
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body class="visualization-page">
+    <header class="main-header">
+        <div class="header-content">
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">Início</a>
+                <a href="#sobre" class="nav-link">Sobre</a>
+                <a href="#saibamais" class="nav-link">Saiba mais</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="visualization-content">
+        <div class="visualization-container">
+            <h1 class="section-title">Visualização Gráfica</h1>
+            <div class="graph-container">
+                <div id="grafico" class="main-graph"></div>
+            </div>
+            <div class="action-options">
+                <div class="action-option">
+                    <p>Deseja iniciar um novo problema de programação linear?</p>
+                    <a href="principal.html" class="action-button" onclick="localStorage.removeItem('modificarProblema');">
+                        Novo Problema
+                    </a>
+                </div>
+                <div class="action-option">
+                    <p>Quer ajustar as configurações do problema atual?</p>
+                    <button id="modificarProblemaBtn" class="action-button secondary">
+                        Alterar Problema
+                    </button>
+                </div>
+            </div>
+            <div class="constraints-table"> 
+            </div>
+        </div>
+    </main>
+
+    <footer class="minimal-footer">
+        <span>© 2025 GriffSolver</span>
+    </footer>
+
+    <script src="../js/grafico.js"></script>
+    <script>
+        document.getElementById('modificarProblemaBtn').addEventListener('click', function () {
+            localStorage.setItem('modificarProblema', 'true');
+            window.location.href = 'principal.html';
+        });
+    </script>
+</body>
+</html>
