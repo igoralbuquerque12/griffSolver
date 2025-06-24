@@ -1,0 +1,37 @@
+{
+  "name": "griffsolver",
+  "version": "1.0.0",
+  "description": "GriffSolver é uma ferramenta web para resolução de problemas de Programação Linear, oferecendo tanto soluções numéricas quanto visualizações gráficas. O sistema implementa o algoritmo Simplex e o método Big-M, além de fornecer representações gráficas interativas das soluções.",
+  "homepage": "https://github.com/igoralbuquerque12/griffSolver#readme",
+  "bugs": {
+    "url": "https://github.com/igoralbuquerque12/griffSolver/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/igoralbuquerque12/griffSolver.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "view/index.html",
+  "scripts": {
+    "dev": "npm run development",
+    "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "watch": "npm run development -- --watch",
+    "watch-poll": "npm run watch -- --watch-poll",
+    "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "prod": "npm run production",
+    "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "fix-memory-limit": "cross-env LIMIT=4096 increase-memory-limit"
+  },
+  "devDependencies": {
+    "laravel-mix": "^5.0.9",
+    "replace-in-file-webpack-plugin": "^1.0.6",
+    "resolve-url-loader": "^3.1.0",
+    "sass": "^1.89.2",
+    "sass-loader": "^8.0.2",
+    "vue-template-compiler": "^2.7.16",
+    "webpack": "^4.47.0",
+    "webpack-cli": "^3.3.12"
+  }
+}

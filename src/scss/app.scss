@@ -1,3 +1,6 @@
+@import "./grafico.scss";
+@import "./tabular.scss";
+
 /* Base Styles */
 :root {
     --primary-color: #4A3B6B;
@@ -463,7 +466,7 @@ body {
 
 .main-graph {
     width: 100%;
-    height: 500px;
+    min-height: 500px;
     background-color: var(--card-background);
     border-radius: var(--border-radius);
     overflow: hidden;
@@ -879,4 +882,15 @@ body {
 
 .table tr:hover {
     background-color: rgba(138, 123, 181, 0.2);
+}
+
+.w-max-content {
+    width: max-content !important;
+}
+
+.table-inicial {
+    td, th {
+        padding: 0.25rem;
+        text-align: center;
+    }
 }

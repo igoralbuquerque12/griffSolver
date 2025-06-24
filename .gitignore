@@ -1,0 +1,5 @@
+dist/*.*
+dist/*/*.*
+!dist/vendor/*.*
+!dist/vendor/*/*.*
+node_modules

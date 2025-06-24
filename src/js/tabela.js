@@ -25,14 +25,14 @@ document.getElementById('confirmarBtn').addEventListener('click', function () {
     // Linha para o objetivo
     tabelaHTML += `<tr>
         <td>
-            <select id="tipoObjetivo" class="custom-select">
+            <select id="tipoObjetivo" class="custom-select form-control w-max-content">
                 <option value="Maximizar">Maximizar</option>
                 <option value="Minimizar">Minimizar</option>
             </select>
         </td>`;
 
     for (let i = 1; i <= qtdVariaveis; i++) {
-        tabelaHTML += `<td><input type="number" class="custom-input" id="coefObjetivo${i}" /></td>`;
+        tabelaHTML += `<td><input type="number" class="custom-input form-control" id="coefObjetivo${i}" /></td>`;
     }
     tabelaHTML += `<td></td><td></td></tr>`;
 
@@ -41,7 +41,7 @@ document.getElementById('confirmarBtn').addEventListener('click', function () {
         tabelaHTML += `<tr>
             <td>Restrição ${i}</td>`;
         for (let j = 1; j <= qtdVariaveis; j++) {
-            tabelaHTML += `<td><input type="number" class="custom-input" id="coefRestricao${i}_${j}" /></td>`;
+            tabelaHTML += `<td><input type="number" class="custom-input form-control" id="coefRestricao${i}_${j}" /></td>`;
         }
         tabelaHTML += ` 
             <td>
@@ -51,7 +51,7 @@ document.getElementById('confirmarBtn').addEventListener('click', function () {
                     <option value="=">=</option>
                 </select>
             </td>
-            <td><input type="number" class="custom-input" id="rhsRestricao${i}" /></td>
+            <td><input type="number" class="custom-input form-control" id="rhsRestricao${i}" /></td>
         </tr>`;
     }
 
@@ -64,8 +64,8 @@ document.getElementById('confirmarBtn').addEventListener('click', function () {
     // Adiciona os botões "Tabular" e "Gráfico"
     let botoesHTML = `
     <div class="botoes-container">
-        <button id="tabularBtn" class="btn">Tabular</button>
-        <button id="graficoBtn" class="btn ${qtdVariaveis > 2 ? 'btn-disabled' : ''}">Gráfico</button>
+        <button id="tabularBtn" class="btn btn-secondary">Tabular</button>
+        <button id="graficoBtn" class="btn btn-secondary ${qtdVariaveis > 2 ? 'disabled' : ''}">Gráfico</button>
     </div>
     `;
     tabelaContainer.insertAdjacentHTML('beforeend', botoesHTML);
