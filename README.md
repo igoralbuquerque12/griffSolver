@@ -34,6 +34,9 @@ GriffSolver é uma ferramenta web para resolução de problemas de Programação
 - HTML5
 - CSS3
 - Plotly.js
+- JQuery
+- Webpack
+- SASS
 
 ## 📁 Estrutura do Projeto
 
