@@ -7,11 +7,12 @@ import "./support/helpers";
 
 class ProblemaDual {
     constructor(problemaDual) {
-        const { objetivo, restricoes, rhsRestricoes, variaveis } = problemaDual;
+        const { objetivo, restricoes, rhsRestricoes, variaveis, metodo } = problemaDual;
         this.objetivo = objetivo;
         this.restricoes = restricoes;
         this.rhsRestricoes = rhsRestricoes;
         this.variaveis = variaveis;
+        this.metodo = metodo;
     }
 
     /**
@@ -21,6 +22,7 @@ class ProblemaDual {
      */
     static preparar(problema) {
         const inverterCoefs = problema.tipo != 'Minimizar';
+        const metodo = problema.tipo == 'Minimizar' ? 'Maximizar' : 'Minimizar';
         let indiceArtificial = problema.restricoes
             .reduce((acc, restricao) => Math.max(acc, (restricao.coef ?? []).length), 0);
 
@@ -84,7 +86,8 @@ class ProblemaDual {
             objetivo: coeficientesDuais,
             restricoes: restricoesDuais,
             rhsRestricoes: rhsDual,
-            variaveis: variaveisDuais
+            variaveis: variaveisDuais,
+            metodo: metodo
         };
     }
 
@@ -93,10 +96,9 @@ class ProblemaDual {
         return new ProblemaDual(this.preparar(problema));
     }
 
-    tabela()
-    {
+    tabela() {
         let tabela = this.restricoes.map((linha) => [...linha]);
-        for(const i in tabela) {
+        for (const i in tabela) {
             tabela[i].push(this.rhsRestricoes[i]);
         }
         tabela.push([...this.objetivo]);
@@ -106,31 +108,153 @@ class ProblemaDual {
 
 
 class DualSimplexSolver {
-    constructor(problemaDual)
-    {
+    constructor(problemaDual) {
         this.problema = problemaDual;
         this.tabela = problemaDual.tabela();
     }
 
-    static current()
-    {
+    static current() {
         return (new DualSimplexSolver(ProblemaDual.current()));
     }
+}
+
+
+function recuperarSolucaoPrimal() {
+  // =================== INPUT ======================
+  const primalMethod = 'min';
+  const primalCols = ['x1', 'x2'];
+  const primalObjective = [0.4, 0.5];
+  const restrictions = [
+    [0.3, 0.1, 2.7, '<='],
+    [0.5, 0.5, 6, '='],
+    [0.6, 0.4, 6, '>=']
+  ];
+
+  const dualTableauRows = ['s1', 'y2', 'Z'];
+  const dualTableauCols = ['y1', 'y2', 'y3', 's1', 's2', 'RHS'];
+  const dualTableau = [
+    [-0.2, 0, 0.2, 1, -1, 0.1],
+    [0.2, 1, -0.8, 0, -2, 1],
+    [1.5, 0, -1.2, 0, 12, -6]
+  ];
+
+  // =================== PASSO 1: Solução Dual ======================
+  const n = dualTableauCols.length - 1; // exclui RHS
+  const m = dualTableauRows.length - 1; // exclui Z
+  const solucaoDual = {};
+  dualTableauCols.slice(0, n).forEach(v => solucaoDual[v] = 0);
+
+  for (let i = 0; i < m; i++) {
+    const nome = dualTableauRows[i];
+    const rhs = dualTableau[i][n];
+    if (dualTableauCols.includes(nome)) {
+      solucaoDual[nome] = rhs;
+    }
+  }
+
+  console.log("\n=== Solução Dual ===");
+  console.table(solucaoDual);
+
+  // =================== PASSO 2: Identificar restrições ativas do primal ======================
+//   const restricoesAtivas = Object.entries(solucaoDual)
+//     .filter(([v, val]) => v.startsWith('y') && val > 1e-8)
+//     .map(([v]) => parseInt(v.slice(1)) - 1); // pega índice 0-based
+const restricoesAtivas = [0, 1];
+
+  console.log("Restrições ativas do primal:", restricoesAtivas.map(i => `R${i+1}`).join(', '));
+
+  // =================== PASSO 3: Construir sistema Ax = b ======================
+  const A = [];
+  const b = [];
+
+  for (const i of restricoesAtivas) {
+    const [a1, a2, bi] = restrictions[i];
+    A.push([a1, a2]);
+    b.push(bi);
+  }
+
+  // Resolver sistema Ax = b (eliminação de Gauss)
+  const x = resolverSistemaLinear(A, b);
+
+  // =================== PASSO 4: Calcular Z ======================
+  let z = 0;
+  for (let i = 0; i < x.length; i++) z += primalObjective[i] * x[i];
+
+  console.log("\n=== Solução Primal ===");
+  const solucaoPrimal = {};
+  for (let i = 0; i < x.length; i++) {
+    solucaoPrimal[primalCols[i]] = x[i];
+  }
+  console.table(solucaoPrimal);
+  console.log("Valor ótimo Z =", z.toFixed(4));
+
+
+  // =================== Função auxiliar ======================
+  function resolverSistemaLinear(A, b) {
+    const n = b.length;
+    const M = A.map((row, i) => row.concat(b[i]));
+
+    for (let i = 0; i < n; i++) {
+      let maxRow = i;
+      for (let k = i+1; k < n; k++) {
+        if (Math.abs(M[k][i]) > Math.abs(M[maxRow][i])) maxRow = k;
+      }
+      [M[i], M[maxRow]] = [M[maxRow], M[i]];
+
+      const piv = M[i][i];
+      if (Math.abs(piv) < 1e-10) throw new Error("Sistema singular");
+
+      for (let j = i; j <= n; j++) M[i][j] /= piv;
+
+      for (let k = 0; k < n; k++) {
+        if (k !== i) {
+          const factor = M[k][i];
+          for (let j = i; j <= n; j++) {
+            M[k][j] -= factor * M[i][j];
+          }
+        }
+      }
+    }
+    return M.map(row => row[n]);
+  }
 }
 
 $(() => {
     // const solver = DualSimplexSolver.current();
     // console.log(solver);
-    
+
     const initialTableau = ProblemaDual.current().tabela();
     console.log(initialTableau);
-    
-    const deepSolver = new DeepSolver(initialTableau);
-    deepSolver.solve();
 
-    // const gSolver = new GSolver(initialTableau, ["y1", "y2+", "y2-", "y3'", "s1", "s2", "RHS"], ["s1", "s2", "Z"])
-    // gSolver.solve();
+    // const deepSolver = new DeepSolver(initialTableau);
+    // deepSolver.solve();
+
+    const restrictions = [
+        [0.4, 0.5, 0, 'z'], // Objetivo
+        [0.3, 0.1, 2.7, '<='],// restricao
+        [0.5, 0.5, 6, '='],
+        [0.6, 0.4, 6, '>=']
+    ];
+
+
+    const dualRows = ['s1', "y2+", 'Z'];
+    const dualCols = ['y1', "y2+", "y2-", "y3'", 's1', 's2', 'RHS'];
+    const gSolver = new GSolver(initialTableau, dualCols, dualRows)
+    gSolver.solve();
     
+    console.log(Problema.current());
+    
+
+    const resultingDualRows = ['s1', "y2", 'Z'];
+    const resultingDualCols = ['y1', "y2", "y3'", 's1', 's2', 'RHS'];
+    const resultingDualTableau = [
+        [-0.2, 0, -0.2, 1, -1, 0.1],
+        [0.2, 1, 0.8, 0, -2, 1.0],  
+        [-1.5, 0, -1.2, 0, -12, 6.0] 
+    ];
+
+    // recuperarSolucaoPrimal(resultingDualTableau, resultingDualRows, resultingDualCols);
+    recuperarSolucaoPrimal();
 });
 
 // $(() => {

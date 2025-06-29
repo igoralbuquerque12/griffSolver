@@ -1,4 +1,4 @@
-class DualSimplexSolver {
+class DeepSolver2 {
     constructor(tableau, variableCount) {
         this.tableau = tableau;
         this.rows = tableau.length;
@@ -170,53 +170,6 @@ class DualSimplexSolver {
                 value = Number.parseFloat(this.tableau[varIndex][this.cols - 1]).toFixed(2);
             }
             console.log(`y:${i+1} = ${value}`);
-        }
-        return;
-        
-        
-        const tolerance = 1e-5;
-        const solution = new Array(this.cols - 1).fill(0);
-        
-        // Identificar variáveis básicas
-        for (let i = 0; i < this.rows - 1; i++) {
-            let colIndex = -1;
-            let isCanonical = true;
-            
-            // Encontrar coluna pivô para esta linha
-            for (let j = 0; j < this.cols - 1; j++) {
-                const absVal = Math.abs(this.tableau[i][j]);
-                
-                // Verificar se é candidato a variável básica
-                if (absVal > tolerance) {
-                    if (colIndex === -1) {
-                        colIndex = j;
-                    } else {
-                        // Mais de um elemento não-zero na linha
-                        isCanonical = false;
-                        break;
-                    }
-                }
-            }
-            
-            // Se encontrou coluna candidata e é coluna canônica
-            if (colIndex !== -1 && isCanonical) {
-                // Verificar se é coluna canônica nas outras linhas
-                for (let k = 0; k < this.rows - 1; k++) {
-                    if (k !== i && Math.abs(this.tableau[k][colIndex]) > tolerance) {
-                        isCanonical = false;
-                        break;
-                    }
-                }
-                
-                if (isCanonical) {
-                    solution[colIndex] = this.tableau[i][this.cols - 1] / this.tableau[i][colIndex];
-                }
-            }
-        }
-        
-        // Imprimir solução
-        for (let j = 0; j < this.cols - 1; j++) {
-            console.log(`y${j+1} = ${solution[j].toFixed(4)}`);
         }
     }
 }
