@@ -267,9 +267,412 @@ $(function () {
   !*** ./src/js/modules/DeepSolver.js ***!
   \**************************************/
 /*! exports provided: default */
-/***/ (function(module, exports) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nError: ENOENT: no such file or directory, open '/home/lucas/Documents/Projetos/Academicos/griffSolver/src/js/modules/DeepSolver.js'");
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+var DualSimplexSolver = /*#__PURE__*/function () {
+  function DualSimplexSolver(tableau, variableCount) {
+    _classCallCheck(this, DualSimplexSolver);
+    this.tableau = tableau;
+    this.rows = tableau.length;
+    this.cols = tableau[0].length;
+    this.iterations = 0;
+    this.isMinimization = true;
+    // Índiices de variaveis
+    var i = this.cols - this.rows;
+    this.variables = new Array(this.rows - 1).fill(0).map(function () {
+      return i++;
+    });
+  }
+  return _createClass(DualSimplexSolver, [{
+    key: "solve",
+    value: function solve() {
+      while (true) {
+        this.printTableau();
+        var pivotRow = this.findPivotRow();
+        if (pivotRow === -1) {
+          if (this.checkOptimality()) {
+            console.log("\nSolução ótima encontrada!");
+            this.printSolution();
+            return;
+          } else {
+            console.log("\nSolução viável - Mudando para Simplex Primal...");
+            this.primalSimplex();
+            return;
+          }
+        }
+        var pivotCol = this.findPivotCol(pivotRow);
+        if (pivotCol === -1) {
+          console.log("\nProblema ilimitado.");
+          return;
+        }
+        this.variables[pivotRow] = pivotCol;
+        console.log("\nItera\xE7\xE3o ".concat(++this.iterations, ": Piv\xF4 [").concat(pivotRow, ",").concat(pivotCol, "] = ").concat(this.tableau[pivotRow][pivotCol].toFixed(4)));
+        this.pivot(pivotRow, pivotCol);
+      }
+    }
+  }, {
+    key: "findPivotRow",
+    value: function findPivotRow() {
+      var minVal = 0;
+      var pivotRow = -1;
+      for (var i = 0; i < this.rows - 1; i++) {
+        var rhs = this.tableau[i][this.cols - 1];
+        if (rhs < minVal) {
+          minVal = rhs;
+          pivotRow = i;
+        }
+      }
+      return pivotRow;
+    }
+  }, {
+    key: "findPivotCol",
+    value: function findPivotCol(pivotRow) {
+      var minRatio = Infinity;
+      var pivotCol = -1;
+      for (var j = 0; j < this.cols - 1; j++) {
+        var a = this.tableau[pivotRow][j];
+        if (a >= 0) continue;
+        var cost = this.tableau[this.rows - 1][j];
+        var ratio = Math.abs(cost / a);
+        if (ratio < minRatio) {
+          minRatio = ratio;
+          pivotCol = j;
+        }
+      }
+      return pivotCol;
+    }
+  }, {
+    key: "pivot",
+    value: function pivot(pivotRow, pivotCol) {
+      var pivotValue = this.tableau[pivotRow][pivotCol];
+      for (var j = 0; j < this.cols; j++) {
+        this.tableau[pivotRow][j] /= pivotValue;
+      }
+      for (var i = 0; i < this.rows; i++) {
+        if (i === pivotRow) continue;
+        var factor = this.tableau[i][pivotCol];
+        for (var _j = 0; _j < this.cols; _j++) {
+          this.tableau[i][_j] -= factor * this.tableau[pivotRow][_j];
+        }
+      }
+    }
+  }, {
+    key: "checkOptimality",
+    value: function checkOptimality() {
+      var lastRow = this.rows - 1;
+      for (var j = 0; j < this.cols - 1; j++) {
+        if (this.tableau[lastRow][j] < 0) return false;
+      }
+      return true;
+    }
+  }, {
+    key: "primalSimplex",
+    value: function primalSimplex() {
+      while (true) {
+        this.printTableau();
+        if (this.checkOptimality()) {
+          console.log("\nSolução ótima encontrada!");
+          this.printSolution();
+          return;
+        }
+        var pivotCol = this.findEnteringCol();
+        if (pivotCol === -1) {
+          console.log("\nProblema ilimitado.");
+          return;
+        }
+        var pivotRow = this.findMinRatioRow(pivotCol);
+        if (pivotRow === -1) {
+          console.log("\nSem razão válida.");
+          return;
+        }
+        console.log("\nItera\xE7\xE3o Primal ".concat(++this.iterations, ": Piv\xF4 [").concat(pivotRow, ",").concat(pivotCol, "] = ").concat(this.tableau[pivotRow][pivotCol].toFixed(4)));
+        this.pivot(pivotRow, pivotCol);
+      }
+    }
+  }, {
+    key: "findEnteringCol",
+    value: function findEnteringCol() {
+      var lastRow = this.rows - 1;
+      var minVal = 0;
+      var pivotCol = -1;
+      for (var j = 0; j < this.cols - 1; j++) {
+        if (this.tableau[lastRow][j] < minVal) {
+          minVal = this.tableau[lastRow][j];
+          pivotCol = j;
+        }
+      }
+      return pivotCol;
+    }
+  }, {
+    key: "findMinRatioRow",
+    value: function findMinRatioRow(pivotCol) {
+      var minRatio = Infinity;
+      var pivotRow = -1;
+      for (var i = 0; i < this.rows - 1; i++) {
+        var a = this.tableau[i][pivotCol];
+        if (a <= 0) continue;
+        var b = this.tableau[i][this.cols - 1];
+        var ratio = b / a;
+        if (ratio < minRatio) {
+          minRatio = ratio;
+          pivotRow = i;
+        }
+      }
+      return pivotRow;
+    }
+  }, {
+    key: "printTableau",
+    value: function printTableau() {
+      console.log("\nTableau:");
+      for (var i = 0; i < this.rows; i++) {
+        var row = "";
+        for (var j = 0; j < this.cols; j++) {
+          row += this.tableau[i][j].toFixed(4).padStart(8) + " ";
+        }
+        console.log(row);
+      }
+    }
+  }, {
+    key: "printSolution",
+    value: function printSolution() {
+      var w = -this.tableau[this.rows - 1][this.cols - 1];
+      console.log("\nValor \xF3timo: ".concat(w.toFixed(4)));
+      console.log("Solução dual:");
+      for (var i = 0; i < this.cols - 1; i++) {
+        var value = '0.00';
+        var varIndex = this.variables.indexOf(i);
+        if (varIndex !== -1) {
+          value = Number.parseFloat(this.tableau[varIndex][this.cols - 1]).toFixed(2);
+        }
+        console.log("y:".concat(i + 1, " = ").concat(value));
+      }
+      return;
+      var tolerance = 1e-5;
+      var solution = new Array(this.cols - 1).fill(0);
+
+      // Identificar variáveis básicas
+      for (var _i = 0; _i < this.rows - 1; _i++) {
+        var colIndex = -1;
+        var isCanonical = true;
+
+        // Encontrar coluna pivô para esta linha
+        for (var j = 0; j < this.cols - 1; j++) {
+          var absVal = Math.abs(this.tableau[_i][j]);
+
+          // Verificar se é candidato a variável básica
+          if (absVal > tolerance) {
+            if (colIndex === -1) {
+              colIndex = j;
+            } else {
+              // Mais de um elemento não-zero na linha
+              isCanonical = false;
+              break;
+            }
+          }
+        }
+
+        // Se encontrou coluna candidata e é coluna canônica
+        if (colIndex !== -1 && isCanonical) {
+          // Verificar se é coluna canônica nas outras linhas
+          for (var k = 0; k < this.rows - 1; k++) {
+            if (k !== _i && Math.abs(this.tableau[k][colIndex]) > tolerance) {
+              isCanonical = false;
+              break;
+            }
+          }
+          if (isCanonical) {
+            solution[colIndex] = this.tableau[_i][this.cols - 1] / this.tableau[_i][colIndex];
+          }
+        }
+      }
+
+      // Imprimir solução
+      for (var _j2 = 0; _j2 < this.cols - 1; _j2++) {
+        console.log("y".concat(_j2 + 1, " = ").concat(solution[_j2].toFixed(4)));
+      }
+    }
+  }]);
+}();
+var DeepSolver = /*#__PURE__*/function () {
+  function DeepSolver(tableau) {
+    _classCallCheck(this, DeepSolver);
+    this.tableau = tableau.map(function (row) {
+      return _toConsumableArray(row);
+    }); // Deep copy
+    this.rows = tableau.length;
+    this.cols = tableau[0].length;
+    this.iterations = 0;
+  }
+  return _createClass(DeepSolver, [{
+    key: "solve",
+    value: function solve() {
+      while (true) {
+        this.printTableau();
+
+        // Verificar se solução é ótima (todos RHS >= 0)
+        if (this.isOptimal()) {
+          console.log("\nSolução ótima encontrada!");
+          this.printSolution();
+          return;
+        }
+
+        // Encontrar linha pivô (mais negativo no RHS)
+        var pivotRow = this.findPivotRow();
+        if (pivotRow === -1) {
+          console.log("\nNão há valores negativos no RHS - solução ótima.");
+          return;
+        }
+
+        // Encontrar coluna pivô
+        var pivotCol = this.findPivotCol(pivotRow);
+        if (pivotCol === -1) {
+          console.log("\nProblema ilimitado - não há elementos negativos na linha pivô.");
+          return;
+        }
+        console.log("\nItera\xE7\xE3o ".concat(++this.iterations, ": Piv\xF4 [").concat(pivotRow, ",").concat(pivotCol, "] = ").concat(this.tableau[pivotRow][pivotCol].toFixed(4)));
+        this.pivot(pivotRow, pivotCol);
+      }
+    }
+  }, {
+    key: "findPivotRow",
+    value: function findPivotRow() {
+      var minVal = 0;
+      var pivotRow = -1;
+
+      // Percorrer todas as linhas, exceto a última (linha Z)
+      for (var i = 0; i < this.rows - 1; i++) {
+        var rhs = this.tableau[i][this.cols - 1]; // Última coluna = RHS
+        if (rhs < minVal) {
+          minVal = rhs;
+          pivotRow = i;
+        }
+      }
+      return pivotRow;
+    }
+  }, {
+    key: "findPivotCol",
+    value: function findPivotCol(pivotRow) {
+      var minRatio = Infinity;
+      var pivotCol = -1;
+      for (var j = 0; j < this.cols - 1; j++) {
+        var element = this.tableau[pivotRow][j];
+
+        // Ignorar elementos não-negativos
+        if (element >= 0) continue;
+
+        // Calcular razão (coef linha Z / elemento)
+        var cost = this.tableau[this.rows - 1][j];
+        var ratio = Math.abs(cost / element);
+        if (ratio < minRatio) {
+          minRatio = ratio;
+          pivotCol = j;
+        }
+      }
+      return pivotCol;
+    }
+  }, {
+    key: "pivot",
+    value: function pivot(pivotRow, pivotCol) {
+      var pivotValue = this.tableau[pivotRow][pivotCol];
+
+      // Normalizar a linha pivô
+      for (var j = 0; j < this.cols; j++) {
+        this.tableau[pivotRow][j] /= pivotValue;
+      }
+
+      // Atualizar outras linhas
+      for (var i = 0; i < this.rows; i++) {
+        if (i === pivotRow) continue;
+        var factor = this.tableau[i][pivotCol];
+        for (var _j3 = 0; _j3 < this.cols; _j3++) {
+          this.tableau[i][_j3] -= factor * this.tableau[pivotRow][_j3];
+        }
+      }
+    }
+  }, {
+    key: "isOptimal",
+    value: function isOptimal() {
+      // Verificar se todos os RHS são não-negativos (exceto linha Z)
+      for (var i = 0; i < this.rows - 1; i++) {
+        if (this.tableau[i][this.cols - 1] < 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }, {
+    key: "printTableau",
+    value: function printTableau() {
+      console.log("\nTableau Atual:");
+      for (var i = 0; i < this.rows; i++) {
+        var row = "";
+        for (var j = 0; j < this.cols; j++) {
+          row += this.formatNumber(this.tableau[i][j]) + "\t";
+        }
+        console.log(row);
+      }
+    }
+  }, {
+    key: "formatNumber",
+    value: function formatNumber(value) {
+      // Formata números para melhor visualização
+      if (Math.abs(value) < 0.0001) value = 0; // Evitar -0.00
+      return value.toFixed(4).padStart(8);
+    }
+  }, {
+    key: "printSolution",
+    value: function printSolution() {
+      console.log("Valor \xF3timo de Z: ".concat(this.tableau[this.rows - 1][this.cols - 1].toFixed(4)));
+      console.log("Solução:");
+      for (var j = 0; j < this.cols - 1; j++) {
+        var isBasic = false;
+        var value = 0;
+        var rowIndex = -1;
+
+        // Verificar se a variável é básica
+        for (var i = 0; i < this.rows - 1; i++) {
+          if (Math.abs(this.tableau[i][j]) > 0.0001) {
+            var hasOtherNonZero = false;
+
+            // Verificar se é coluna canônica
+            for (var k = 0; k < this.cols - 1; k++) {
+              if (k !== j && Math.abs(this.tableau[i][k]) > 0.0001) {
+                hasOtherNonZero = true;
+                break;
+              }
+            }
+            if (!hasOtherNonZero && Math.abs(this.tableau[i][j] - 1) < 0.0001) {
+              isBasic = true;
+              value = this.tableau[i][this.cols - 1];
+              rowIndex = i;
+              break;
+            }
+          }
+        }
+        if (isBasic) {
+          console.log("Vari\xE1vel ".concat(j + 1, " = ").concat(value.toFixed(4), " (b\xE1sica, linha ").concat(rowIndex, ")"));
+        } else {
+          console.log("Vari\xE1vel ".concat(j + 1, " = 0.0000 (n\xE3o-b\xE1sica)"));
+        }
+      }
+    }
+  }]);
+}();
+/* harmony default export */ __webpack_exports__["default"] = (DeepSolver);
 
 /***/ }),
 
@@ -278,9 +681,129 @@ throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index
   !*** ./src/js/modules/GSolver.js ***!
   \***********************************/
 /*! exports provided: default */
-/***/ (function(module, exports) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nError: ENOENT: no such file or directory, open '/home/lucas/Documents/Projetos/Academicos/griffSolver/src/js/modules/GSolver.js'");
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+// Dual Simplex Tabular Solver - JavaScript Puro
+// Agora com geração automática da tabela dual e definição de variáveis básicas e não básicas
+var GSolver = /*#__PURE__*/function () {
+  /**
+   * @param {number[][]} tableau - matriz (m+1)x(n+1) pronta para Dual Simplex
+   * @param {string[]} cols - nomes das colunas (variáveis não básicas + RHS)
+   * @param {string[]} rows - nomes das linhas (variáveis básicas + Z)
+   */
+  function GSolver(tableau, cols, rows) {
+    _classCallCheck(this, GSolver);
+    this.tableau = tableau.map(function (r) {
+      return r.slice();
+    });
+    this.cols = cols.slice();
+    this.rows = rows.slice();
+    this.iter = 0;
+  }
+
+  // Imprime a tabela atual
+  return _createClass(GSolver, [{
+    key: "printCurrent",
+    value: function printCurrent() {
+      var _this = this;
+      console.log("\n--- Itera\xE7\xE3o ".concat(this.iter, " ---"));
+      var header = ["BV"].concat(this.cols);
+      var table = this.tableau.map(function (row, i) {
+        var obj = {
+          BV: _this.rows[i]
+        };
+        _this.cols.forEach(function (c, j) {
+          return obj[c] = row[j];
+        });
+        return obj;
+      });
+      console.table(table, header);
+    }
+
+    // Executa uma iteração; retorna false se ótimo ou inviável
+  }, {
+    key: "step",
+    value: function step() {
+      var m = this.tableau.length - 1;
+      var n = this.cols.length - 1;
+      // 1) Linha pivô: menor RHS (<0)
+      var pivotRow = -1,
+        minRhs = 0;
+      for (var i = 0; i < m; i++) {
+        var rhs = this.tableau[i][n];
+        if (rhs < minRhs) {
+          minRhs = rhs;
+          pivotRow = i;
+        }
+      }
+      if (pivotRow < 0) {
+        console.log('Ótimo encontrado.');
+        this.printCurrent();
+        return false;
+      }
+      // 2) Coluna pivô: coef<0 na linha, ratio mínimo |Z_j / a_ij|
+      var pivotCol = -1,
+        bestRatio = Infinity;
+      for (var j = 0; j < n; j++) {
+        var aij = this.tableau[pivotRow][j];
+        if (aij < 0) {
+          var zj = this.tableau[m][j];
+          var ratio = Math.abs(zj / aij);
+          if (ratio < bestRatio) {
+            bestRatio = ratio;
+            pivotCol = j;
+          }
+        }
+      }
+      if (pivotCol < 0) {
+        console.error('Dual inviável.');
+        return false;
+      }
+      // 3) Pivotamento
+      this.pivot(pivotRow, pivotCol);
+      // 4) Atualiza labels básicos
+      var _ref = [this.cols[pivotCol], this.rows[pivotRow]];
+      this.rows[pivotRow] = _ref[0];
+      this.cols[pivotCol] = _ref[1];
+      this.iter++;
+      this.printCurrent();
+      return true;
+    }
+  }, {
+    key: "pivot",
+    value: function pivot(row, col) {
+      var m = this.tableau.length,
+        n = this.cols.length;
+      var piv = this.tableau[row][col];
+      // normaliza linha
+      for (var j = 0; j < n; j++) this.tableau[row][j] /= piv;
+      // zera colunas
+      for (var i = 0; i < m; i++) {
+        if (i !== row) {
+          var factor = this.tableau[i][col];
+          for (var _j = 0; _j < n; _j++) {
+            this.tableau[i][_j] -= factor * this.tableau[row][_j];
+          }
+        }
+      }
+    }
+  }, {
+    key: "solve",
+    value: function solve() {
+      this.printCurrent();
+      while (this.step());
+    }
+  }]);
+}();
+/* harmony default export */ __webpack_exports__["default"] = (GSolver);
 
 /***/ }),
 
