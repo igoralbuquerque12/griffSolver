@@ -132,7 +132,7 @@ document.getElementById('confirmarBtn').addEventListener('click', function () {
   tabelaContainer.innerHTML = tabelaHTML; // Limpa o contêiner anterior e adiciona nova tabela
 
   // Adiciona os botões "Tabular" e "Gráfico"
-  var botoesHTML = "\n    <div class=\"botoes-container\">\n        <button id=\"tabularBtn\" class=\"btn btn-secondary\">Tabular</button>\n        <button id=\"graficoBtn\" class=\"btn btn-secondary ".concat(qtdVariaveis > 2 ? 'disabled' : '', "\">Gr\xE1fico</button>\n    </div>\n    ");
+  var botoesHTML = "\n    <div class=\"botoes-container\">\n        <button id=\"tabularBtn\" class=\"btn btn-secondary\">Tabular</button>\n        <button id=\"graficoBtn\" class=\"btn btn-secondary ".concat(qtdVariaveis > 2 ? 'disabled' : '', "\">Gr\xE1fico</button>\n        <button id=\"dualSimplexBtn\" class=\"btn btn-secondary\">Dual Simplex</button>\n    </div>\n    ");
   tabelaContainer.insertAdjacentHTML('beforeend', botoesHTML);
 
   // Desabilita o botão "Gráfico" se houver mais de 2 variáveis
@@ -236,6 +236,11 @@ document.getElementById('confirmarBtn').addEventListener('click', function () {
   // Evento de clique para o botão "Tabular"
   document.getElementById('tabularBtn').addEventListener('click', function () {
     handleButtonClick('tabular.html');
+  });
+
+  // Evento de clique para o botão "Tabular"
+  document.getElementById('dualSimplexBtn').addEventListener('click', function () {
+    handleButtonClick('dual-simplex.html');
   });
 });
 

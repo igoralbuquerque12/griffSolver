@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GriffSolver - Visualização</title>
+    <title>GriffSolver - Solução Dual Simplex</title>
     <link rel="icon" href="./img/logo.png" type="image/png">
     <link rel="stylesheet" href="../dist/vendor/bootstrap-4.6/bootstrap.min.css">
     <link rel="stylesheet" href="../dist/css/app.css">
 </head>
-<body class="visualization-page">
+<body class="tabular-page">
     <header class="main-header">
         <div class="header-content">
             <nav class="header-nav">
                 <a href="index.html" class="nav-link">Início</a>
-                <a href="#sobre" class="nav-link">Sobre</a>
+                <a href="sobre.html" class="nav-link">Sobre</a>
                 <a href="#saibamais" class="nav-link">Saiba mais</a>
             </nav>
         </div>
     </header>
 
-    <main class="visualization-content">
-        <div class="visualization-container">
-            <h1 class="section-title">Visualização Gráfica</h1>
-            <div class="graph-container">
-                <div id="grafico" class="main-graph"></div>
+    <main class="tabular-content">
+        <div class="solution-container">
+            <h1 class="section-title">Solução Simplex</h1>
+            <div class="table-wrapper">
+                <div id="tabela-container" class="simplex-table"></div>
             </div>
             <div class="action-options">
                 <div class="action-option">
@@ -39,8 +39,6 @@
                     </button>
                 </div>
             </div>
-            <div class="constraints-table"> 
-            </div>
         </div>
     </main>
 
@@ -48,8 +46,8 @@
         <span>© 2025 GriffSolver</span>
     </footer>
 
-    <script src="../dist/vendor/plotty/plotly-latest.min.js"></script>
-    <script src="../dist/js/grafico.js"></script>
+    <script src="../dist//vendor/bootstrap-4.6/jquery.slim.min.js"></script>
+    <script src="../dist/js/dual-simplex.js"></script>
     <script>
         document.getElementById('modificarProblemaBtn').addEventListener('click', function () {
             localStorage.setItem('modificarProblema', 'true');

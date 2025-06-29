@@ -9,5 +9,6 @@ mix
     .js('./src/js/grafico.js', './dist/js/')
     .js('./src/js/tabela.js', './dist/js/')
     .js('./src/js/tabular.js', './dist/js/')
+    .js('./src/js/dual-simplex.js', './dist/js/')
     // CSS
     .sass('./src/scss/app.scss', './dist/css/');

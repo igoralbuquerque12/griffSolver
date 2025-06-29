@@ -66,6 +66,7 @@ document.getElementById('confirmarBtn').addEventListener('click', function () {
     <div class="botoes-container">
         <button id="tabularBtn" class="btn btn-secondary">Tabular</button>
         <button id="graficoBtn" class="btn btn-secondary ${qtdVariaveis > 2 ? 'disabled' : ''}">Gráfico</button>
+        <button id="dualSimplexBtn" class="btn btn-secondary">Dual Simplex</button>
     </div>
     `;
     tabelaContainer.insertAdjacentHTML('beforeend', botoesHTML);
@@ -176,4 +177,8 @@ function handleButtonClick(targetPage) {
         handleButtonClick('tabular.html');
     });
 
+    // Evento de clique para o botão "Tabular"
+    document.getElementById('dualSimplexBtn').addEventListener('click', function () {
+        handleButtonClick('dual-simplex.html');
+    });
 });
