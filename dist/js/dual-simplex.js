@@ -95,9 +95,11 @@
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _modules_Problema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./modules/Problema */ "./src/js/modules/Problema.js");
-/* harmony import */ var _support_helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./support/helpers */ "./src/js/support/helpers.js");
-/* harmony import */ var _support_helpers__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_support_helpers__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _modules_DeepSolver__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./modules/DeepSolver */ "./src/js/modules/DeepSolver.js");
+/* harmony import */ var _modules_GSolver__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/GSolver */ "./src/js/modules/GSolver.js");
+/* harmony import */ var _modules_Problema__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/Problema */ "./src/js/modules/Problema.js");
+/* harmony import */ var _support_helpers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./support/helpers */ "./src/js/support/helpers.js");
+/* harmony import */ var _support_helpers__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_support_helpers__WEBPACK_IMPORTED_MODULE_3__);
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -112,9 +114,19 @@ function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" 
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 
+
+
 var ProblemaDual = /*#__PURE__*/function () {
   function ProblemaDual(problemaDual) {
     _classCallCheck(this, ProblemaDual);
+    var objetivo = problemaDual.objetivo,
+      restricoes = problemaDual.restricoes,
+      rhsRestricoes = problemaDual.rhsRestricoes,
+      variaveis = problemaDual.variaveis;
+    this.objetivo = objetivo;
+    this.restricoes = restricoes;
+    this.rhsRestricoes = rhsRestricoes;
+    this.variaveis = variaveis;
   }
 
   /**
@@ -122,15 +134,22 @@ var ProblemaDual = /*#__PURE__*/function () {
    * para o dual simplex
    * @param {Problema} problema 
    */
-  return _createClass(ProblemaDual, null, [{
+  return _createClass(ProblemaDual, [{
+    key: "tabela",
+    value: function tabela() {
+      var tabela = this.restricoes.map(function (linha) {
+        return _toConsumableArray(linha);
+      });
+      for (var i in tabela) {
+        tabela[i].push(this.rhsRestricoes[i]);
+      }
+      tabela.push(_toConsumableArray(this.objetivo));
+      return tabela;
+    }
+  }], [{
     key: "preparar",
     value: function preparar(problema) {
-      // const tipo = 'min';
-      // let coeficientesIniciais = [...problema.coeficientes];
-      // if(problema.tipo != 'Minimizar') {
-      //     coeficientesIniciais = coeficientesIniciais.map((val) => (0 - val));
-      // }
-      console.log(problema);
+      var inverterCoefs = problema.tipo != 'Minimizar';
       var indiceArtificial = problema.restricoes.reduce(function (acc, restricao) {
         var _restricao$coef;
         return Math.max(acc, ((_restricao$coef = restricao.coef) !== null && _restricao$coef !== void 0 ? _restricao$coef : []).length);
@@ -144,32 +163,124 @@ var ProblemaDual = /*#__PURE__*/function () {
         return [];
       });
       var variaveisDuais = [];
-      var rhsDual = _toConsumableArray(problema.coeficientes);
+      var rhsDual = _toConsumableArray(problema.coeficientes).map(function (val) {
+        return val * -1;
+      });
+      var indexDiff = 0;
       for (var i in problema.restricoes) {
         var restricao = problema.restricoes[i];
-        coeficientesDuais.push(restricao.rhs);
-        variaveisDuais.push(restricao.operator);
+        var multiplicador = restricao.operator == '>=' ? -1 : 1;
+        i = Number.parseInt(i);
+        coeficientesDuais.push((inverterCoefs ? -1 : 1) * multiplicador * restricao.rhs);
+        variaveisDuais.push({
+          variavel: "y".concat(i + 1),
+          indice: i + indexDiff,
+          tipo: 'variavel'
+        });
         for (var j in restricao.coef) {
-          restricoesDuais[j][i] = restricao.coef[j];
+          restricoesDuais[j][i + indexDiff] = (0 - multiplicador) * restricao.coef[j];
+        }
+        if (restricao.operator == '=') {
+          indexDiff++;
+          variaveisDuais.push({
+            variavel: "y".concat(i + 1, "\""),
+            indice: i + indexDiff,
+            tipo: 'espelho'
+          });
+          coeficientesDuais.push((0 - multiplicador) * restricao.rhs);
         }
       }
-
-      // Preparar para algoritmo dual
+      // Preparando para algoritmo
+      // Preenchendo variáveis com igualdade
+      for (var _i in variaveisDuais) {
+        var variavel = variaveisDuais[_i];
+        if (variavel.tipo == 'espelho') {
+          for (var _j in restricoesDuais) {
+            restricoesDuais[_j][variavel.indice] = 0 - restricoesDuais[_j][variavel.indice - 1];
+          }
+        }
+      }
+      // Adicionando variáveis de folga
+      var colLength = restricoesDuais[0].length;
+      var contVariaveisFolga = restricoesDuais.length;
+      for (var _i2 = 0; _i2 <= contVariaveisFolga - 1; _i2++) {
+        restricoesDuais[_i2] = restricoesDuais[_i2] = fillArrayEnd(restricoesDuais[_i2], contVariaveisFolga);
+        restricoesDuais[_i2][colLength + _i2] = 1;
+        coeficientesDuais.push(0);
+        variaveisDuais.push({
+          variavel: "s".concat(_i2 + 1, "\""),
+          indice: _i2,
+          tipo: 'folga'
+        });
+      }
+      // 0 do RHS
+      coeficientesDuais.push(0);
+      return {
+        objetivo: coeficientesDuais,
+        restricoes: restricoesDuais,
+        rhsRestricoes: rhsDual,
+        variaveis: variaveisDuais
+      };
     }
   }, {
     key: "current",
     value: function current() {
-      var problema = _modules_Problema__WEBPACK_IMPORTED_MODULE_0__["default"].current();
+      var problema = _modules_Problema__WEBPACK_IMPORTED_MODULE_2__["default"].current();
       return new ProblemaDual(this.preparar(problema));
     }
   }]);
 }();
-var DualSimplex = /*#__PURE__*/_createClass(function DualSimplex() {
-  _classCallCheck(this, DualSimplex);
-});
+var DualSimplexSolver = /*#__PURE__*/function () {
+  function DualSimplexSolver(problemaDual) {
+    _classCallCheck(this, DualSimplexSolver);
+    this.problema = problemaDual;
+    this.tabela = problemaDual.tabela();
+  }
+  return _createClass(DualSimplexSolver, null, [{
+    key: "current",
+    value: function current() {
+      return new DualSimplexSolver(ProblemaDual.current());
+    }
+  }]);
+}();
 $(function () {
-  ProblemaDual.current();
+  // const solver = DualSimplexSolver.current();
+  // console.log(solver);
+
+  var initialTableau = ProblemaDual.current().tabela();
+  console.log(initialTableau);
+  var deepSolver = new _modules_DeepSolver__WEBPACK_IMPORTED_MODULE_0__["default"](initialTableau);
+  deepSolver.solve();
+
+  // const gSolver = new GSolver(initialTableau, ["y1", "y2+", "y2-", "y3'", "s1", "s2", "RHS"], ["s1", "s2", "Z"])
+  // gSolver.solve();
 });
+
+// $(() => {
+//     (new DeepSolver()).solve()
+// })
+
+/***/ }),
+
+/***/ "./src/js/modules/DeepSolver.js":
+/*!**************************************!*\
+  !*** ./src/js/modules/DeepSolver.js ***!
+  \**************************************/
+/*! exports provided: default */
+/***/ (function(module, exports) {
+
+throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nError: ENOENT: no such file or directory, open '/home/lucas/Documents/Projetos/Academicos/griffSolver/src/js/modules/DeepSolver.js'");
+
+/***/ }),
+
+/***/ "./src/js/modules/GSolver.js":
+/*!***********************************!*\
+  !*** ./src/js/modules/GSolver.js ***!
+  \***********************************/
+/*! exports provided: default */
+/***/ (function(module, exports) {
+
+throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nError: ENOENT: no such file or directory, open '/home/lucas/Documents/Projetos/Academicos/griffSolver/src/js/modules/GSolver.js'");
 
 /***/ }),
 
@@ -229,6 +340,14 @@ var Problema = /*#__PURE__*/function () {
 
 // Variável grande de inviabilidade
 window.M = 10000;
+window.padArrayEnd = function (arr, targetLength) {
+  var padValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+  return arr.concat(Array(Math.max(0, targetLength - arr.length)).fill(padValue));
+};
+window.fillArrayEnd = function (arr, count) {
+  var padValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+  return arr.concat(Array(Math.max(0, count)).fill(padValue));
+};
 
 /***/ }),
 
