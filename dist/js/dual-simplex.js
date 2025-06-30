@@ -100,10 +100,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _support_helpers__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_support_helpers__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _support_tabelas_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./support/tabelas-html */ "./src/js/support/tabelas-html.js");
 /* harmony import */ var _support_tabelas_html__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_support_tabelas_html__WEBPACK_IMPORTED_MODULE_2__);
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
@@ -473,6 +469,7 @@ var DualSimplexSolver = /*#__PURE__*/function () {
       var restricoesAtivas = somatorios.filter(function (v, i) {
         return Number.parseFloat(v.toFixed(2)) != 0;
       }).keys().toArray();
+      var restrictionLength = restrictions[0].length;
       var A = [];
       var b = [];
       var _iterator = _createForOfIteratorHelper(restricoesAtivas),
@@ -480,12 +477,8 @@ var DualSimplexSolver = /*#__PURE__*/function () {
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var _i5 = _step.value;
-          var _restrictions$_i = _slicedToArray(restrictions[_i5], 3),
-            a1 = _restrictions$_i[0],
-            a2 = _restrictions$_i[1],
-            bi = _restrictions$_i[2];
-          A.push([a1, a2]);
-          b.push(bi);
+          A.push(restrictions[_i5].slice(0, restrictionLength - 2));
+          b.push(restrictions[_i5][restrictionLength - 2]);
         }
 
         // Resolver sistema Ax = b 

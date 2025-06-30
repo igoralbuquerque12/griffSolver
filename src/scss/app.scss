@@ -939,8 +939,17 @@ ul {
     }
 }
 
+.botoes-container {
+    margin-top: 1rem;
+}
+
 #tabela-container {
     padding: 0 2rem;
+
+    &.table-panel {
+        padding-bottom: 1rem;
+        padding-top: 1rem;
+    }
 
     .table {
         margin-bottom: 3rem;

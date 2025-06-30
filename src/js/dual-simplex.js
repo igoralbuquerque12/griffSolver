@@ -322,12 +322,12 @@ class DualSimplexSolver {
             
             
         const restricoesAtivas = somatorios.filter((v, i) => Number.parseFloat(v.toFixed(2)) != 0).keys().toArray();
+        const restrictionLength = restrictions[0].length;
         const A = [];
         const b = [];
         for (const i of restricoesAtivas) {
-            const [a1, a2, bi] = restrictions[i];
-            A.push([a1, a2]);
-            b.push(bi);
+            A.push(restrictions[i].slice(0, restrictionLength - 2));
+            b.push(restrictions[i][restrictionLength - 2]);
         }
 
         // Resolver sistema Ax = b 
