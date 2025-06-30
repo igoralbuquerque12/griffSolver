@@ -1,14 +1,13 @@
 @import "./grafico.scss";
-@import "./tabular.scss";
 
 /* Base Styles */
 :root {
-    --primary-color: #4A3B6B;
-    --secondary-color: #6B5B8E;
-    --accent-color: #8A7BB5;
-    --text-color: #F8F6FF;
-    --background-color: #2A2438;
-    --card-background: #352D4A;
+    --primary-color: #4a3b6b;
+    --secondary-color: #6b5b8e;
+    --accent-color: #8a7bb5;
+    --text-color: #f8f6ff;
+    --background-color: #2a2438;
+    --card-background: #352d4a;
     --border-radius: 12px;
     --transition: all 0.3s ease;
 }
@@ -20,13 +19,49 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family:
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+.action-options {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin: 2rem 0;
+    padding: 2rem;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+}
+.action-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+
+    p {
+        font-size: 1.2rem;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+    .action-button {
+        min-width: 200px;
+    }
 }
 
 /* Main Header */
@@ -131,7 +166,7 @@ body {
 .gradient-text {
     font-size: 4.5rem;
     font-weight: 800;
-    background: linear-gradient(45deg, #FEFBF2, #676F9D);
+    background: linear-gradient(45deg, #fefbf2, #676f9d);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 1.5rem;
@@ -150,7 +185,8 @@ body {
     gap: 1.5rem;
 }
 
-.cta-primary, .cta-secondary {
+.cta-primary,
+.cta-secondary {
     padding: 1rem 2rem;
     border-radius: var(--border-radius);
     text-decoration: none;
@@ -169,7 +205,8 @@ body {
     color: var(--text-color);
 }
 
-.cta-primary:hover, .cta-secondary:hover {
+.cta-primary:hover,
+.cta-secondary:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
@@ -199,7 +236,7 @@ body {
 .about-header h1 {
     font-size: 3rem;
     margin-bottom: 1.5rem;
-    background: linear-gradient(45deg, #FEFBF2, #676F9D);
+    background: linear-gradient(45deg, #fefbf2, #676f9d);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -251,13 +288,13 @@ body {
 }
 
 .card-image::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     height: 50%;
-    background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
 }
 
 .card-image img {
@@ -439,7 +476,7 @@ body {
 .visualization-container h1 {
     text-align: center;
     margin-bottom: 2rem;
-    background: linear-gradient(45deg, #F8F6FF, #8A7BB5);
+    background: linear-gradient(45deg, #f8f6ff, #8a7bb5);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-size: 2.5rem;
@@ -576,7 +613,7 @@ body {
 .solution-container h1 {
     text-align: center;
     margin-bottom: 2rem;
-    background: linear-gradient(45deg, #FEFBF2, #676F9D);
+    background: linear-gradient(45deg, #fefbf2, #676f9d);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -834,7 +871,8 @@ body {
     width: 100%;
 }
 
-.tabela-titulo {
+.tabela-titulo,
+.resultado-titulo {
     text-align: center;
     color: var(--text-color);
     font-size: 1.5rem;
@@ -843,6 +881,11 @@ body {
     background-color: var(--primary-color);
     border-radius: var(--border-radius);
     width: fit-content;
+}
+
+.resultado-container > *:not(.resultado-titulo) {
+    padding-left: 1rem;
+    padding-right: 1rem;
 }
 
 .tabela-wrapper {
@@ -889,8 +932,17 @@ body {
 }
 
 .table-inicial {
-    td, th {
+    td,
+    th {
         padding: 0.25rem;
         text-align: center;
+    }
+}
+
+#tabela-container {
+    padding: 0 2rem;
+
+    .table {
+        margin-bottom: 3rem;
     }
 }
