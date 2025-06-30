@@ -98,12 +98,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_Problema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./modules/Problema */ "./src/js/modules/Problema.js");
 /* harmony import */ var _support_helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./support/helpers */ "./src/js/support/helpers.js");
 /* harmony import */ var _support_helpers__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_support_helpers__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _support_tabela__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./support/tabela */ "./src/js/support/tabela.js");
-/* harmony import */ var _support_tabela__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_support_tabela__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _support_tabelas_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./support/tabelas-html */ "./src/js/support/tabelas-html.js");
+/* harmony import */ var _support_tabelas_html__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_support_tabelas_html__WEBPACK_IMPORTED_MODULE_2__);
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -119,6 +120,20 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
 
 
+var enable_logging = false;
+function consoleLog() {
+  if (enable_logging) {
+    var _console;
+    (_console = console).log.apply(_console, arguments);
+  }
+}
+function consoleTable() {
+  var tableData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  var properties = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  if (enable_logging) {
+    console.table(tableData, properties);
+  }
+}
 var ProblemaDual = /*#__PURE__*/function () {
   function ProblemaDual(problemaDual, problemaPrimal) {
     _classCallCheck(this, ProblemaDual);
@@ -157,17 +172,12 @@ var ProblemaDual = /*#__PURE__*/function () {
     value: function getVars() {
       var cols = [];
       for (var i in this.variaveis) {
-        var append = '';
-        if (this.variaveis[i].tipo == 'espelho') {
-          cols[i - 1] += '+';
-          append = '-';
-        }
-        cols.push((this.variaveis[i].variavel + append).replaceAll('"', ''));
+        cols.push(this.variaveis[i].variavel);
       }
       cols.push('RHS');
       var rows = [];
       for (var _i in this.rhsRestricoes) {
-        rows.push('s' + (Number.parseInt(_i) + 1));
+        rows.push('s' + subscript(Number.parseInt(_i) + 1));
       }
       rows.push('Z');
       return {
@@ -202,19 +212,26 @@ var ProblemaDual = /*#__PURE__*/function () {
         var multiplicador = restricao.operator == '>=' ? -1 : 1;
         i = Number.parseInt(i);
         coeficientesDuais.push((inverterCoefs ? -1 : 1) * multiplicador * restricao.rhs);
-        variaveisDuais.push({
-          variavel: "y".concat(i + 1),
+        var novaVariavel = {
+          variavel: "y".concat(subscript(i + 1)),
           indice: i + indexDiff,
-          tipo: 'variavel'
-        });
+          indiceRestricao: i,
+          tipo: 'restrita'
+        };
+        if (restricao.operator == '=') {
+          novaVariavel.tipo = 'irrestrita';
+          novaVariavel.variavel += '⁺';
+        }
+        variaveisDuais.push(novaVariavel);
         for (var j in restricao.coef) {
           restricoesDuais[j][i + indexDiff] = (0 - multiplicador) * restricao.coef[j];
         }
         if (restricao.operator == '=') {
           indexDiff++;
           variaveisDuais.push({
-            variavel: "y".concat(i + 1, "\""),
+            variavel: "y".concat(subscript(i + 1), "\u207B"),
             indice: i + indexDiff,
+            indiceRestricao: i,
             tipo: 'espelho'
           });
           coeficientesDuais.push((0 - multiplicador) * restricao.rhs);
@@ -238,8 +255,9 @@ var ProblemaDual = /*#__PURE__*/function () {
         restricoesDuais[_i3][colLength + _i3] = 1;
         coeficientesDuais.push(0);
         variaveisDuais.push({
-          variavel: "s".concat(_i3 + 1, "\""),
+          variavel: "s".concat(subscript(_i3 + 1)),
           indice: _i3,
+          indiceRestricao: _i3,
           tipo: 'folga'
         });
       }
@@ -270,9 +288,11 @@ var DualSimplexSolver = /*#__PURE__*/function () {
     var _this$problem$getVars = this.problem.getVars(),
       cols = _this$problem$getVars.cols,
       rows = _this$problem$getVars.rows;
+    this.initialCols = _toConsumableArray(cols);
     this.cols = cols.slice();
     this.rows = rows.slice();
     this.numberVariables = this.problem.restricoes.length;
+    this.tableauRows = _toConsumableArray(rows).slice(0, rows.length - 1);
   }
   return _createClass(DualSimplexSolver, [{
     key: "printCurrent",
@@ -282,7 +302,7 @@ var DualSimplexSolver = /*#__PURE__*/function () {
       var _this = this;
       var header = ["BV"].concat(this.cols);
       var title = this.iter > 0 ? "Itera\xE7\xE3o ".concat(this.iter) : 'Forma dual';
-      mostrarTabelaSimplex(this.tableau, title, this.cols, this.rows, this.numberVariables);
+      mostrarTabelaSimplex(this.tableau, title, this.initialCols, this.tableauRows);
       var table = this.tableau.map(function (row, i) {
         var obj = {
           BV: _this.rows[i]
@@ -292,7 +312,7 @@ var DualSimplexSolver = /*#__PURE__*/function () {
         });
         return obj;
       });
-      console.table(table, header);
+      consoleTable(table, header);
     }
   }, {
     key: "printSolution",
@@ -318,7 +338,7 @@ var DualSimplexSolver = /*#__PURE__*/function () {
         }
       }
       if (pivotRow < 0) {
-        console.log('Ótimo encontrado.');
+        consoleLog('Ótimo encontrado.');
         this.printSolution();
         return false;
       }
@@ -353,8 +373,8 @@ var DualSimplexSolver = /*#__PURE__*/function () {
   }, {
     key: "pivot",
     value: function pivot(row, col) {
-      var m = this.tableau.length,
-        n = this.cols.length;
+      var m = this.tableau.length;
+      var n = this.cols.length;
       var piv = this.tableau[row][col];
       // normaliza linha
       for (var j = 0; j < n; j++) this.tableau[row][j] /= piv;
@@ -367,6 +387,8 @@ var DualSimplexSolver = /*#__PURE__*/function () {
           }
         }
       }
+      // Salva a variável que entrou na base
+      this.tableauRows[row] = this.problem.variaveis[col].variavel;
     }
   }, {
     key: "solve",
@@ -377,37 +399,34 @@ var DualSimplexSolver = /*#__PURE__*/function () {
   }, {
     key: "recuperarSolucaoPrimal",
     value: function recuperarSolucaoPrimal() {
-      var primalMethod = 'min';
-      var primalCols = ['x1', 'x2'];
-      var primalObjective = [0.4, 0.5];
-      var restrictions = [[0.3, 0.1, 2.7, '<='], [0.5, 0.5, 6, '='], [0.6, 0.4, 6, '>=']];
-      var dualTableauRows = ['s1', 'y2', 'Z'];
-      var dualTableauCols = ['y1', 'y2', 'y3', 's1', 's2', 'RHS'];
-      var dualTableau = [[-0.2, 0, 0.2, 1, -1, 0.1], [0.2, 1, -0.8, 0, -2, 1], [1.5, 0, -1.2, 0, 12, -6]];
-
-      // Preparando linhas da solução Dual 
-      var n = dualTableauCols.length - 1; // exclui RHS
-      var m = dualTableauRows.length - 1; // exclui Z
-      var solucaoDual = {};
-      dualTableauCols.slice(0, n).forEach(function (v) {
-        return solucaoDual[v] = 0;
+      var _this2 = this;
+      var primalProblem = this.problem.primal;
+      var primalObjective = _toConsumableArray(primalProblem.coeficientes);
+      var primalCols = primalObjective.map(function (coef, i) {
+        return "x".concat(i + 1);
       });
-      for (var i = 0; i < m; i++) {
-        var nome = dualTableauRows[i];
-        var rhs = dualTableau[i][n];
-        if (dualTableauCols.includes(nome)) {
-          solucaoDual[nome] = rhs;
-        }
-      }
-
-      // Identificar restrições ativas do primal
-      //   const restricoesAtivas = Object.entries(solucaoDual)
-      //     .filter(([v, val]) => v.startsWith('y') && val > 1e-8)
-      //     .map(([v]) => parseInt(v.slice(1)) - 1); // pega índice 0-based
-      var restricoesAtivas = [0, 1];
-      console.log("Restrições ativas do primal:", restricoesAtivas.map(function (i) {
-        return "R".concat(i + 1);
-      }).join(', '));
+      var restrictions = primalProblem.restricoes.map(function (restricao) {
+        return _toConsumableArray(restricao.coef).concat([restricao.rhs, restricao.operator]);
+      });
+      var dualProblem = this.problem;
+      var dualTableauRows = _toConsumableArray(this.rows);
+      var dualTableauCols = [];
+      var loadedCols = false;
+      var dualTableau = _toConsumableArray(this.tableau).map(function (row) {
+        var resultingRow = [];
+        row.forEach(function (item, index) {
+          var variable = dualProblem.variaveis[index];
+          if ((variable === null || variable === void 0 ? void 0 : variable.tipo) != 'espelho') {
+            if (!loadedCols && variable) {
+              dualTableauCols.push(variable.variavel);
+            }
+            resultingRow.push(Number.parseFloat(item.toFixed(2)));
+          }
+        });
+        loadedCols = true;
+        return resultingRow;
+      });
+      dualTableauCols.push('RHS');
 
       // Construir sistema Ax = b
       // Função auxiliar (eliminação de Gauss)
@@ -416,22 +435,22 @@ var DualSimplexSolver = /*#__PURE__*/function () {
         var M = A.map(function (row, i) {
           return row.concat(b[i]);
         });
-        for (var _i4 = 0; _i4 < n; _i4++) {
-          var maxRow = _i4;
-          for (var k = _i4 + 1; k < n; k++) {
-            if (Math.abs(M[k][_i4]) > Math.abs(M[maxRow][_i4])) maxRow = k;
+        for (var i = 0; i < n; i++) {
+          var maxRow = i;
+          for (var k = i + 1; k < n; k++) {
+            if (Math.abs(M[k][i]) > Math.abs(M[maxRow][i])) maxRow = k;
           }
-          var _ref2 = [M[maxRow], M[_i4]];
-          M[_i4] = _ref2[0];
+          var _ref2 = [M[maxRow], M[i]];
+          M[i] = _ref2[0];
           M[maxRow] = _ref2[1];
-          var piv = M[_i4][_i4];
+          var piv = M[i][i];
           if (Math.abs(piv) < 1e-10) throw new Error("Sistema singular");
-          for (var j = _i4; j <= n; j++) M[_i4][j] /= piv;
+          for (var j = i; j <= n; j++) M[i][j] /= piv;
           for (var _k = 0; _k < n; _k++) {
-            if (_k !== _i4) {
-              var factor = M[_k][_i4];
-              for (var _j3 = _i4; _j3 <= n; _j3++) {
-                M[_k][_j3] -= factor * M[_i4][_j3];
+            if (_k !== i) {
+              var factor = M[_k][i];
+              for (var _j3 = i; _j3 <= n; _j3++) {
+                M[_k][_j3] -= factor * M[i][_j3];
               }
             }
           }
@@ -440,34 +459,53 @@ var DualSimplexSolver = /*#__PURE__*/function () {
           return row[n];
         });
       }
+      var somatorios = new Array(primalProblem.restricoes.length).fill(0);
+      var colCount = dualTableau[0].length;
+      dualTableauRows.map(function (col, rowIndex) {
+        var variavel = _this2.problem.variaveis.find(function (v) {
+          return v.variavel == col;
+        });
+        if (variavel) {
+          var valor = variavel.tipo == 'espelho' ? -1 : 1;
+          somatorios[variavel.indiceRestricao] += valor * dualTableau[rowIndex][colCount - 1];
+        }
+      });
+      var restricoesAtivas = somatorios.filter(function (v, i) {
+        return Number.parseFloat(v.toFixed(2)) != 0;
+      }).keys().toArray();
       var A = [];
       var b = [];
-      for (var _i5 = 0, _restricoesAtivas = restricoesAtivas; _i5 < _restricoesAtivas.length; _i5++) {
-        var _i6 = _restricoesAtivas[_i5];
-        var _restrictions$_i = _slicedToArray(restrictions[_i6], 3),
-          a1 = _restrictions$_i[0],
-          a2 = _restrictions$_i[1],
-          bi = _restrictions$_i[2];
-        A.push([a1, a2]);
-        b.push(bi);
-      }
+      var _iterator = _createForOfIteratorHelper(restricoesAtivas),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var _i5 = _step.value;
+          var _restrictions$_i = _slicedToArray(restrictions[_i5], 3),
+            a1 = _restrictions$_i[0],
+            a2 = _restrictions$_i[1],
+            bi = _restrictions$_i[2];
+          A.push([a1, a2]);
+          b.push(bi);
+        }
 
-      // Resolver sistema Ax = b 
+        // Resolver sistema Ax = b 
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
       var x = resolverSistemaLinear(A, b);
 
       // Calcular Z
       var z = 0;
-      for (var _i7 = 0; _i7 < x.length; _i7++) z += primalObjective[_i7] * x[_i7];
-      console.log("\n=== Solução Primal ===");
+      for (var i = 0; i < x.length; i++) z += primalObjective[i] * x[i];
+      consoleLog("\n=== Solução Primal ===");
       var solucaoPrimal = {};
-      for (var _i8 = 0; _i8 < x.length; _i8++) {
-        solucaoPrimal[primalCols[_i8]] = x[_i8];
+      for (var _i4 = 0; _i4 < x.length; _i4++) {
+        solucaoPrimal[primalCols[_i4]] = x[_i4];
       }
-      console.table(solucaoPrimal);
-      console.log(solucaoPrimal);
-
-      // console.log("Valor ótimo Z =", z.toFixed(2));
-
+      consoleTable(solucaoPrimal);
+      consoleLog(solucaoPrimal);
       return {
         solucaoPrimal: solucaoPrimal,
         z: z.toFixed(2)
@@ -555,14 +593,24 @@ window.fillArrayEnd = function (arr, count) {
 
 /***/ }),
 
-/***/ "./src/js/support/tabela.js":
-/*!**********************************!*\
-  !*** ./src/js/support/tabela.js ***!
-  \**********************************/
+/***/ "./src/js/support/tabelas-html.js":
+/*!****************************************!*\
+  !*** ./src/js/support/tabelas-html.js ***!
+  \****************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-window.mostrarTabelaSimplex = function (tabela, titulo, variaveis, base, numVariaveis) {
+window.subscript = function (value) {
+  var resultingString = '';
+  var replaceArray = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
+  var str = value.toString();
+  for (var i in str) {
+    var _replaceArray$str$i;
+    resultingString += (_replaceArray$str$i = replaceArray[str[i]]) !== null && _replaceArray$str$i !== void 0 ? _replaceArray$str$i : 0;
+  }
+  return resultingString;
+};
+window.mostrarTabelaSimplex = function (tabela, titulo, variaveis, base) {
   var linhaPivo = -1;
   var colunaPivo = -1;
   var isFinalIteration = -1;
@@ -577,12 +625,8 @@ window.mostrarTabelaSimplex = function (tabela, titulo, variaveis, base, numVari
   // Cabeçalho da tabela
   tabelaHTML += '<tr><th></th>';
   for (var i in variaveis) {
-    i = Number.parseInt(i);
-    if (i < variaveis.length - numVariaveis - 1) {
-      tabelaHTML += "<th>y".concat(i + 1, "</th>");
-    } else if (i < variaveis.length - 1) {
-      var index = i + 1 - (variaveis.length - numVariaveis);
-      tabelaHTML += "<th>s".concat(index + 1, "</th>");
+    if (i < variaveis.length - 1) {
+      tabelaHTML += "<th>".concat(variaveis[i], "</th>");
     } else {
       tabelaHTML += "<th>RHS</th></tr></thead><tbody>";
     }
@@ -618,7 +662,7 @@ window.mostrarTabelaSimplex = function (tabela, titulo, variaveis, base, numVari
 window.mostrarResultadoFinal = function (solucao, resultadoZ) {
   var titulo = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'Solução ótima';
   var resultadoContainer = document.getElementById('tabela-container');
-  console.log(solucao, resultadoZ);
+  // console.log(solucao, resultadoZ);
 
   // Exibe o valor de Z e os valores das variáveis de decisão
   var resultadoHTML = "\n            <div class=\"resultado-container\">\n                <h2 class=\"resultado-titulo\">".concat(titulo, "</h2>\n                <p class=\"resultado-valor\">Valor de Z: <strong>").concat(Number.parseFloat(resultadoZ).toFixed(2), "</strong></p>\n                <ul class=\"variaveis-lista\">\n        ");

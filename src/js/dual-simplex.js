@@ -1,6 +1,22 @@
 import Problema from "./modules/Problema";
 import "./support/helpers";
-import "./support/tabela";
+import "./support/tabelas-html";
+
+var enable_logging = false;
+
+function consoleLog(...variables)
+{
+    if(enable_logging) {
+        console.log(...variables);
+    }
+}
+
+function consoleTable(tableData = null, properties = null)
+{
+    if(enable_logging) {
+        console.table(tableData, properties);
+    }
+}
 
 class ProblemaDual {
     constructor(problemaDual, problemaPrimal) {
@@ -36,19 +52,26 @@ class ProblemaDual {
             const multiplicador = restricao.operator == '>=' ? (-1) : 1;
             i = Number.parseInt(i);
             coeficientesDuais.push((inverterCoefs ? (-1) : 1) * multiplicador * restricao.rhs);
-            variaveisDuais.push({
-                variavel: `y${i + 1}`,
+            let novaVariavel = {
+                variavel: `y${subscript(i + 1)}`,
                 indice: i + indexDiff,
-                tipo: 'variavel'
-            });
+                indiceRestricao: i,
+                tipo:  'restrita'
+            };
+            if(restricao.operator == '=') {
+                novaVariavel.tipo = 'irrestrita';
+                novaVariavel.variavel += '⁺';
+            }
+            variaveisDuais.push(novaVariavel);
             for (const j in restricao.coef) {
                 restricoesDuais[j][i + indexDiff] = (0 - multiplicador) * restricao.coef[j];
             }
             if (restricao.operator == '=') {
                 indexDiff++;
                 variaveisDuais.push({
-                    variavel: `y${i + 1}"`,
+                    variavel: `y${subscript(i + 1)}⁻`,
                     indice: i + indexDiff,
+                    indiceRestricao: i,
                     tipo: 'espelho'
                 });
                 coeficientesDuais.push((0 - multiplicador) * restricao.rhs)
@@ -72,8 +95,9 @@ class ProblemaDual {
             restricoesDuais[i][colLength + i] = 1;
             coeficientesDuais.push(0);
             variaveisDuais.push({
-                variavel: `s${i + 1}"`,
+                variavel: `s${subscript(i + 1)}`,
                 indice: i,
+                indiceRestricao: i,
                 tipo: 'folga'
             });
         }
@@ -105,17 +129,12 @@ class ProblemaDual {
     getVars() {
         let cols = [];
         for(const i in this.variaveis) {
-            let append = '';
-            if(this.variaveis[i].tipo == 'espelho') {
-                cols[i - 1] += '+'
-                append = '-';
-            }
-            cols.push((this.variaveis[i].variavel + append).replaceAll('"', ''));
+            cols.push(this.variaveis[i].variavel);
         }
         cols.push('RHS');
         const rows = [];
         for(const i in this.rhsRestricoes) {
-            rows.push('s' + (Number.parseInt(i) + 1));
+            rows.push('s' + subscript(Number.parseInt(i) + 1));
         }
         rows.push('Z');
         
@@ -132,10 +151,12 @@ class DualSimplexSolver {
         this.tableau = problemaDual.tabela();
         this.iter = 0;
 
-        const { cols, rows } = this.problem.getVars();
+        const { cols, rows } = this.problem.getVars();        
+        this.initialCols = [...cols];
         this.cols = cols.slice();        
         this.rows = rows.slice();
         this.numberVariables = this.problem.restricoes.length;
+        this.tableauRows = [...rows].slice(0, rows.length - 1);
     }
 
     static current() {
@@ -147,13 +168,13 @@ class DualSimplexSolver {
         
         const header = ["BV"].concat(this.cols);
         const title = this.iter > 0 ? `Iteração ${this.iter}` : 'Forma dual';
-        mostrarTabelaSimplex(this.tableau, title, this.cols, this.rows, this.numberVariables);
+        mostrarTabelaSimplex(this.tableau, title, this.initialCols, this.tableauRows);
         const table = this.tableau.map((row, i) => {
             const obj = { BV: this.rows[i] };
             this.cols.forEach((c, j) => obj[c] = row[j]);
             return obj;
         });
-        console.table(table, header);
+        consoleTable(table, header);
     }
 
     printSolution()
@@ -173,7 +194,7 @@ class DualSimplexSolver {
             if (rhs < minRhs) { minRhs = rhs; pivotRow = i; }
         }
         if (pivotRow < 0) {
-            console.log('Ótimo encontrado.');
+            consoleLog('Ótimo encontrado.');
             this.printSolution();
             return false;
         }
@@ -201,7 +222,8 @@ class DualSimplexSolver {
     }
 
     pivot(row, col) {
-        const m = this.tableau.length, n = this.cols.length;
+        const m = this.tableau.length;
+        const n = this.cols.length;
         const piv = this.tableau[row][col];
         // normaliza linha
         for (let j = 0; j < n; j++) this.tableau[row][j] /= piv;
@@ -214,6 +236,8 @@ class DualSimplexSolver {
                 }
             }
         }
+        // Salva a variável que entrou na base
+        this.tableauRows[row] = this.problem.variaveis[col].variavel;
     }
 
     solve() {
@@ -222,44 +246,37 @@ class DualSimplexSolver {
     }
 
     recuperarSolucaoPrimal() {
-        const primalMethod = 'min';
-        const primalCols = ['x1', 'x2'];
-        const primalObjective = [0.4, 0.5];
-        const restrictions = [
-            [0.3, 0.1, 2.7, '<='],
-            [0.5, 0.5, 6, '='],
-            [0.6, 0.4, 6, '>=']
-        ];
+        const primalProblem = this.problem.primal;
+        const primalObjective = [...primalProblem.coeficientes];
+        const primalCols = primalObjective.map((coef, i) => `x${i + 1}`);
+        const restrictions = primalProblem.restricoes.map((restricao) => {
+            return [...restricao.coef].concat([
+                restricao.rhs,
+                restricao.operator
+            ]);
+        });
 
-        const dualTableauRows = ['s1', 'y2', 'Z'];
-        const dualTableauCols = ['y1', 'y2', 'y3', 's1', 's2', 'RHS'];
-        const dualTableau = [
-            [-0.2, 0, 0.2, 1, -1, 0.1],
-            [0.2, 1, -0.8, 0, -2, 1],
-            [1.5, 0, -1.2, 0, 12, -6]
-        ];
-
-        // Preparando linhas da solução Dual 
-        const n = dualTableauCols.length - 1; // exclui RHS
-        const m = dualTableauRows.length - 1; // exclui Z
-        const solucaoDual = {};
-        dualTableauCols.slice(0, n).forEach(v => solucaoDual[v] = 0);
-
-        for (let i = 0; i < m; i++) {
-            const nome = dualTableauRows[i];
-            const rhs = dualTableau[i][n];
-            if (dualTableauCols.includes(nome)) {
-                solucaoDual[nome] = rhs;
-            }
-        }
-
-        // Identificar restrições ativas do primal
-        //   const restricoesAtivas = Object.entries(solucaoDual)
-        //     .filter(([v, val]) => v.startsWith('y') && val > 1e-8)
-        //     .map(([v]) => parseInt(v.slice(1)) - 1); // pega índice 0-based
-        const restricoesAtivas = [0, 1];
-
-        console.log("Restrições ativas do primal:", restricoesAtivas.map(i => `R${i + 1}`).join(', '));
+        const dualProblem = this.problem;
+        const dualTableauRows = [...this.rows];
+        const dualTableauCols = [];
+        
+        let loadedCols = false;
+        const dualTableau = [...this.tableau].map((row) => {
+            const resultingRow = [];
+            row.forEach((item, index)  => {
+                const variable = dualProblem.variaveis[index];                
+                if(variable?.tipo != 'espelho') {
+                    if(!loadedCols && variable) {
+                        dualTableauCols.push(variable.variavel);
+                    }
+                    resultingRow.push(Number.parseFloat(item.toFixed(2)));
+                }
+            });
+            loadedCols = true;
+            return resultingRow;
+        });
+        dualTableauCols.push('RHS');
+        
 
         // Construir sistema Ax = b
         // Função auxiliar (eliminação de Gauss)
@@ -289,11 +306,24 @@ class DualSimplexSolver {
                 }
             }
             return M.map(row => row[n]);
-        }
-
+        }        
+        
+        let somatorios = (new Array(primalProblem.restricoes.length)).fill(0);
+        const colCount = dualTableau[0].length;
+        dualTableauRows
+            .map((col, rowIndex) => {
+                const variavel = this.problem.variaveis.find((v) => v.variavel == col);
+                if(variavel) {
+                    const valor = variavel.tipo == 'espelho' ? -1 : 1;
+                    somatorios[variavel.indiceRestricao] += valor * dualTableau[rowIndex][colCount - 1];
+                }
+            });
+        
+            
+            
+        const restricoesAtivas = somatorios.filter((v, i) => Number.parseFloat(v.toFixed(2)) != 0).keys().toArray();
         const A = [];
         const b = [];
-
         for (const i of restricoesAtivas) {
             const [a1, a2, bi] = restrictions[i];
             A.push([a1, a2]);
@@ -307,15 +337,13 @@ class DualSimplexSolver {
         let z = 0;
         for (let i = 0; i < x.length; i++) z += primalObjective[i] * x[i];
 
-        console.log("\n=== Solução Primal ===");
+        consoleLog("\n=== Solução Primal ===");
         const solucaoPrimal = {};
         for (let i = 0; i < x.length; i++) {
             solucaoPrimal[primalCols[i]] = x[i];
         }
-        console.table(solucaoPrimal);
-        console.log(solucaoPrimal);
-        
-        // console.log("Valor ótimo Z =", z.toFixed(2));
+        consoleTable(solucaoPrimal);
+        consoleLog(solucaoPrimal);
 
         return {
             solucaoPrimal: solucaoPrimal,

@@ -1,4 +1,26 @@
-window.mostrarTabelaSimplex = function(tabela, titulo, variaveis, base, numVariaveis) {
+window.subscript = function (value) {
+    let resultingString = '';
+    const replaceArray = [
+        '₀',
+        '₁',
+        '₂',
+        '₃',
+        '₄',
+        '₅',
+        '₆',
+        '₇',
+        '₈',
+        '₉',
+    ];
+    const str = value.toString();
+    for(const i in str) {
+        resultingString += replaceArray[str[i]] ?? 0;
+    }
+    return resultingString;
+}
+
+
+window.mostrarTabelaSimplex = function (tabela, titulo, variaveis, base) {
     const linhaPivo = -1;
     const colunaPivo = -1;
     const isFinalIteration = -1;
@@ -15,18 +37,14 @@ window.mostrarTabelaSimplex = function(tabela, titulo, variaveis, base, numVaria
                 <table class="table">`;
     // Cabeçalho da tabela
     tabelaHTML += '<tr><th></th>';
-    for(let i in variaveis) {
-        i = Number.parseInt(i);
-        if(i < variaveis.length - numVariaveis - 1) {
-            tabelaHTML += `<th>y${i + 1}</th>`;
-        } else if(i < variaveis.length - 1) {
-            const index = i + 1 - (variaveis.length - numVariaveis);
-            tabelaHTML += `<th>s${index + 1}</th>`;
+    for (let i in variaveis) {
+        if (i < variaveis.length - 1) {
+            tabelaHTML += `<th>${variaveis[i]}</th>`;
         } else {
             tabelaHTML += `<th>RHS</th></tr></thead><tbody>`;
         }
     }
-    
+
 
     // Linhas da tabela com rótulos das variáveis básicas
     const lastLine = tabela.length - 1;
@@ -59,10 +77,10 @@ window.mostrarTabelaSimplex = function(tabela, titulo, variaveis, base, numVaria
 }
 
 
-window.mostrarResultadoFinal = function(solucao, resultadoZ, titulo = 'Solução ótima') {
+window.mostrarResultadoFinal = function (solucao, resultadoZ, titulo = 'Solução ótima') {
     const resultadoContainer = document.getElementById('tabela-container');
-    console.log(solucao, resultadoZ);
-    
+    // console.log(solucao, resultadoZ);
+
     // Exibe o valor de Z e os valores das variáveis de decisão
     let resultadoHTML = `
             <div class="resultado-container">
@@ -71,7 +89,7 @@ window.mostrarResultadoFinal = function(solucao, resultadoZ, titulo = 'Solução
                 <ul class="variaveis-lista">
         `;
 
-    for(const variavel in solucao) {
+    for (const variavel in solucao) {
         resultadoHTML += `<li class="variavel-item">${variavel} = <strong>${Number.parseFloat(solucao[variavel]).toFixed(2)}</strong></li>`;
     }
     resultadoHTML += `
